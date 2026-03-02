@@ -6,14 +6,11 @@ const addressSchema = new mongoose.Schema({
   number: { type: String, required: true },
 });
 
-const integrationsSchema = new mongoose.Schema({
-  telegram_id: { type: String, required: false },
-});
-
 const employeeSchema = new mongoose.Schema({
-  login: { type: String, required: true },
-  password: { type: String, required: true },
-  integrations: { type: integrationsSchema, required: true },
+  first_name: { type: String, required: true },
+  last_name: { type: String, required: true },
+  position: { type: String, required: true },
+  integrations: { type: Object, required: true }
 });
 
 const organizationSchema = new mongoose.Schema(

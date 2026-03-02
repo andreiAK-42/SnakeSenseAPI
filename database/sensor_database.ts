@@ -6,7 +6,7 @@ require("dotenv").config();
 
 class SensorService {
   isConnected: boolean;
-  
+
   constructor() {
     this.isConnected = false;
     this.connect();
@@ -17,22 +17,25 @@ class SensorService {
 
     try {
       const MONGODB_URI = process.env.MONGODB_URI;
-      await mongoose.connect(MONGODB_URI);
-      this.isConnected = true;
-      console.log("✅ MongoDB");
+      if (MONGODB_URI) {
+        await mongoose.connect(MONGODB_URI);
+        this.isConnected = true;
+        console.log("✅ MongoDB");
+      } else {
+        console.log("❌ MongoDB. Ошибка подключения");
+      }
     } catch (error) {
       console.error("❌ MongoDB. Ошибка подключения", error);
       throw error;
     }
   }
+
   async addMeasurement(
-    sensorId,
-    sensorPassword,
-    dhtTemperature,
-    dhtHumidity,
-    bmpTemperature,
-    bmpPressure,
-    mq_au,
+    sensorId: string,
+    sensorPassword: string,
+    dhtTemperature: number,
+    dhtHumidity: number,
+    gas_au: number,
   ) {
     try {
       await this.connect();
@@ -42,9 +45,7 @@ class SensorService {
         data: {
           dht_temperature: dhtTemperature,
           dht_humidity: dhtHumidity,
-          bmp_temperature: bmpTemperature,
-          bmp_pressure: bmpPressure,
-          mq_au: mq_au,
+          gas_au: gas_au,
         },
       });
 
@@ -60,7 +61,7 @@ class SensorService {
     }
   }
 
-  async getMeasurement(sensorId: string, date_start, date_end) {
+  async getMeasurement(sensorId: string, date_start: string, date_end: string) {
     try {
       await this.connect();
       const sensor = await Sensor.findOne({ _id: sensorId });
@@ -90,7 +91,26 @@ class SensorService {
     }
   }
 
-  async findSensorByIdAndPassword(sensorId, password) {
+  async getEmployeeList(organization_id: string) {
+    try {
+      await this.connect();
+      const employees = await Organization.find(
+        {
+          _id: new mongoose.Types.ObjectId(organization_id),
+        },
+        { employees: 1 },
+      );
+
+      console.log(employees);
+
+      return employees;
+
+    } catch (error) {
+      console.error("❌ Ошибка получения датчиков организации: ", error);
+    }
+  }
+
+  async findSensorByIdAndPassword(sensorId: string, password: string) {
     try {
       const sensor = await Sensor.findOne({
         _id: sensorId,
@@ -103,7 +123,7 @@ class SensorService {
     }
   }
 
-  async getAllOrganizationSensors(organizationId) {
+  async getAllOrganizationSensors(organizationId: string) {
     try {
       await this.connect();
       const sonsors = await Sensor.find({
@@ -116,7 +136,7 @@ class SensorService {
     }
   }
 
-  async updateSensor(sensorId, updateData) {
+  async updateSensor(sensorId: string, updateData: object) {
     try {
       await this.connect();
       const sensor = await Sensor.findByIdAndUpdate(
@@ -135,7 +155,7 @@ class SensorService {
     }
   }
 
-  async deleteSensor(sensorId) {
+  async deleteSensor(sensorId: string) {
     try {
       await this.connect();
       const sensor = await Sensor.findByIdAndDelete(sensorId);
@@ -150,5 +170,4 @@ class SensorService {
     }
   }
 }
-
-module.exports = new SensorService();
+export default new SensorService();

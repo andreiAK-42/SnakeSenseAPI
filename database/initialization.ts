@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Organization = require("./models/Organization");
 const Sensor = require("./models/Sensor");
+import UserService from "./models/User";
 const Measurement = require("./models/Measurement");
 require("dotenv").config();
 
@@ -14,7 +15,7 @@ class DatabaseInitializer {
 
   async connect() {
     try {
-      const MONGODB_URI = process.env.MONGODB_URI;
+      const MONGODB_URI = "mongodb://localhost:27017/SnakeSense";
 
       await mongoose.connect(MONGODB_URI);
 
@@ -46,8 +47,9 @@ class DatabaseInitializer {
         api_keys: ["uioi;lmnhy789iol", "2354trhgfvdsasdfsdvbnghjkyi"],
         employees: [
           {
-            login: "test",
-            password: "test",
+            first_name: "Андрей",
+            last_name: "Корбань",
+            position: "Разработчик",
             integrations: { telegram_id: 1429506743 },
           },
         ],
@@ -64,10 +66,6 @@ class DatabaseInitializer {
     try {
       this.organizations = await Organization.insertMany(organizationsData);
       console.log(`✅ Created ${this.organizations.length} organizations`);
-
-      this.organizations.forEach((org) => {
-        console.log(`   - ${org.name} (ID: ${org._id})`);
-      });
     } catch (error) {
       console.error("Error creating organizations:", error);
     }
@@ -88,9 +86,7 @@ class DatabaseInitializer {
         settings: {
           dht_temperature_add: 0,
           dht_humidity_add: 0,
-          bmp_temperature_add: 0,
-          bmp_pressure_add: 0,
-          mq_ppm_add: 0,
+          gas_au: 0,
           place: "Комната 525",
         },
       },
@@ -99,10 +95,25 @@ class DatabaseInitializer {
     try {
       this.sensors = await Sensor.insertMany(sensorsData);
       console.log(`✅ Created ${this.sensors.length} sensors`);
+    } catch (error) {
+      console.error("Error creating sensors:", error);
+    }
+  }
 
-      this.sensors.forEach((sensor) => {
-        console.log(`   - ${sensor.name} (ID: ${sensor._id})`);
-      });
+  async createUser() {
+    if (this.organizations.length === 0) {
+      console.log("❌ No organizations found. Create organizations first.");
+      return;
+    }
+
+    try {
+      await UserService.addNewUser(
+        "xlebyshek",
+        "12345",
+        this.organizations[0]._id,
+        "owner",
+      );
+      console.log(`✅ Created ${this.sensors.length} sensors`);
     } catch (error) {
       console.error("Error creating sensors:", error);
     }
@@ -114,14 +125,9 @@ class DatabaseInitializer {
     await this.connect();
     await this.createOrganizations();
     await this.createSensors();
-
-    console.log("🎉 Database initialization completed!");
-    console.log("\n📊 Summary:");
-    console.log(`   - Organizations: ${this.organizations.length}`);
-    console.log(`   - Sensors: ${this.sensors.length}`);
+    await this.createUser();
 
     mongoose.connection.close();
-    console.log("🔌 MongoDB connection closed");
   }
 }
 

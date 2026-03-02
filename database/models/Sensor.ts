@@ -3,9 +3,7 @@ import mongoose from "mongoose"
 const settingsSchema = new mongoose.Schema({
   dht_temperature_add: { type: Number, default: 0 },
   dht_humidity_add: { type: Number, default: 0 },
-  bmp_pressure_add: { type: Number, default: 0 },
-  mq_ppm_add: { type: Number, default: 0 },
-  bmp_temperature_add: { type: Number, default: 0 },
+  gas_au_add: { type: Number, default: 0 },
   place: { type: String, required: false },
 });
 
