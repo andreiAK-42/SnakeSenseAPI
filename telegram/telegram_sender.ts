@@ -8,7 +8,7 @@ export async function sendTelegramMessage(
   chatId: number = TELEGRAM_CHAT_ID,
 ): Promise<{ success: boolean; message?: string; error?: any }> {
   // Создаём экземпляр бота без прослушивания (polling: false)
-  const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!!, {
+  const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!!,  {
     polling: false, // Важно! Отключаем прослушивание
   });
 
